@@ -16,30 +16,37 @@ def pytest_addoption(parser: Parser):
     parser : Parser
         Pytest Parser instance
     """
-    parser.addoption(
+    group = parser.getgroup('c3-lyb')
+    group.addoption(
         '--url',
         action='store',
         default='http://localhost:8080',
         help='URL for the C3 test environment',
     )
-    parser.addoption(
+    group.addoption(
         '--user',
         action='store',
-        help='User name to use to auth to the C3 environment (Basic auth)',
+        help='User name to use to authenticate to the target tag (Basic auth)',
     )
-    parser.addoption(
+    group.addoption(
         '--password',
         action='store',
-        help='Password to use to auth to the C3 environment (Basic auth)',
+        help='Password to use to authenticate to the target tag (Basic auth)',
     )
-    parser.addoption(
-        '--basic-auth', action='store', help='Authentication string',
+    group.addoption(
+        '--basic-auth',
+        action='store',
+        help='Basic authentication string to the target tag',
     )
-    parser.addoption(
-        '--tenant', action='store', help='Tenant ID',
+    group.addoption(
+        '--tenant',
+        action='store',
+        help='ID of the tenant in which tests should run',
     )
-    parser.addoption(
-        '--tag', action='store', help='Tag ID',
+    group.addoption(
+        '--tag',
+        action='store',
+        help='ID of the tag in which tests should run',
     )
 
 

@@ -1,81 +1,59 @@
-# -*- coding: utf-8 -*-
+import base64
+import os
+
+from _pytest.pytester import Testdir
 
 
-def test_c3_fixture(testdir):
-    """Make sure that pytest accepts our fixture."""
+def test_c3_fixture(testdir: Testdir):
+    """Test basic usage of the c3 fixture.
 
+    Parameters
+    ----------
+    testdir : Testdir
+        Testdir fixture
+    """
     # create a temporary pytest test module
     testdir.makepyfile("""
         def test_c3_my_user(c3: object):
             assert c3.User.myUser().id == 'BA'
     """)
 
-    # run pytest with the following cmd args
+    basic_auth = os.environ['C3_BASIC_AUTH']
+    user_pass = base64.b64decode(basic_auth).decode('utf-8').split(':')
+
+    # Test using either the user/pass or basic auth string command-line options
+    core_clopts = ['--tenant=c3', '--tag=c3', '-v']
+    add_clopts_list = [
+        [f'--basic-auth={basic_auth}'],
+        [f'--user={user_pass[0]}', f'--password={user_pass[1]}'],
+    ]
+    for add_clopts in add_clopts_list:
+        # run pytest with the following cmd args
+        result = testdir.runpytest(*(core_clopts + add_clopts))
+
+        # fnmatch_lines does an assertion internally
+        result.stdout.fnmatch_lines([
+            '*::test_c3_my_user PASSED*',
+        ])
+
+        # make sure that that we get a '0' exit code for the testsuite
+        assert result.ret == 0
+
+
+def test_c3_help_message(testdir: Testdir):
+    """Test the c3 fixture help message.
+
+    Parameters
+    ----------
+    testdir : Testdir
+        Testdir fixture
+    """
     result = testdir.runpytest(
-        '--user=BA',
-        '--password=BA',
-        '--tenant=c3',
-        '--tag=c3',
-        '-v'
-    )
-
-    # fnmatch_lines does an assertion internally
-    result.stdout.fnmatch_lines([
-        '*::test_c3_my_user PASSED*',
-    ])
-
-    # make sure that that we get a '0' exit code for the testsuite
-    assert result.ret == 0
-
-
-def test_c3_help_message(testdir):
-
-    # create a temporary pytest test module
-    testdir.makepyfile("""
-        def test_c3_my_user(c3: object):
-            assert c3.User.myUser().id == 'BA'
-    """)
-
-    result = testdir.runpytest(
-        # '-v',
-        # '--fixtures',
         '--help',
     )
 
-    print(result.stdout)
-    assert False
-
     # fnmatch_lines does an assertion internally
     result.stdout.fnmatch_lines([
-        '*c3-lyb*',
-        # 'c3-lyb:',
-        # '*--foo=DEST_FOO*Set the value for the fixture "bar".',
+        'c3-lyb:',
+        '*--url=URL*URL for the C3 test environment',
     ])
-
-
-# def test_hello_ini_setting(testdir):
-#     testdir.makeini("""
-#         [pytest]
-#         HELLO = world
-#     """)
-
-#     testdir.makepyfile("""
-#         import pytest
-
-#         @pytest.fixture
-#         def hello(request):
-#             return request.config.getini('HELLO')
-
-#         def test_hello_world(hello):
-#             assert hello == 'world'
-#     """)
-
-#     result = testdir.runpytest('-v')
-
-#     # fnmatch_lines does an assertion internally
-#     result.stdout.fnmatch_lines([
-#         '*::test_hello_world PASSED*',
-#     ])
-
-#     # make sure that that we get a '0' exit code for the testsuite
-#     assert result.ret == 0
