@@ -24,13 +24,13 @@ This `pytest`_ plugin was generated with `Cookiecutter`_ along with `@hackebrot`
 Features
 --------
 
-* TODO
+* Use the `c3` pytest fixture... without relying on C3's Conda repository
 
 
 Requirements
 ------------
 
-* TODO
+* N/A
 
 
 Installation
